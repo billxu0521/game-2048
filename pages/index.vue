@@ -4,13 +4,21 @@
       <div class="">
         <div class="p-5">
           <h1 class="text-4xl font-bold mb-8 ">2048 Game</h1>
-          <div class="score-board bg-gray-500 w-20  border rounded-lg">
-            <span class="score-label text-cyan-50">Score:</span>
-            <span class="score-value text-cyan-50">{{ totalscore }}</span>
+          <div class="flex justify-between">
+            <div class="flex flex-col justify-center score-board bg-gray-500 w-[10vw]  border rounded-lg">
+              <div class="score-label text-sm text-center text-white ">Score</div>
+              <div class="score-label text-xl text-center text-white ">{{ totalscore }}
+                <span  class="fixed px-1 score-label text-xl text-center text-white getScore" v-if="isGetScore">
+                  + {{ getScore }}
+                </span>
+              </div>
+              
+            </div>
+            <button class="score-board bg-gray-800 text-xl p-4 text-white border rounded-lg" @click="resetGame()">
+              New Game
+            </button>
           </div>
-          <button class="score-board bg-gray-500  border rounded-lg" @click="resetGame()">
-            New Game
-          </button>
+          
           
         </div>
         <div class="p-3">
@@ -45,7 +53,8 @@ import { ref, onMounted } from 'vue';
 
 // 初始化
 const tiles = ref([]);
-
+const isGetScore = ref(false);
+const getScore = ref(0);
 const resetGame = () => {
   
   tiles.value = [];
@@ -111,7 +120,6 @@ const handleKeyDown = (event) => {
   if(!checkGameOver(1, 0) && !checkGameOver(-1, 0) && !checkGameOver(0, 1) && !checkGameOver(0, 1)){
     alert('Game Over');
   }
-
   round.value++;
   console.log('Round:', round.value);
 };
@@ -124,9 +132,7 @@ const moveTiles = (dx, dy) => {
   const getTile = (row, col) => tiles.value.find(t => t.x === col && t.y === row);
   
   const canMerge = (tile1, tile2) => tile1 && tile2 && tile1.value === tile2.value;
-  
   const mergedPositions = new Set();
-  
   const sortedTiles = tiles.value.slice().sort((a, b) => {
     if (dy === 1) return b.y - a.y;
     if (dy === -1) return a.y - b.y;
@@ -153,6 +159,12 @@ const moveTiles = (dx, dy) => {
         moved = true;
         nextTile.animation = true;
         totalscore.value += nextTile.value;
+        getScore.value = nextTile.value;
+        isGetScore.value = true;
+        setTimeout(() => {
+          isGetScore.value = false;
+          getScore.value = 0 ;
+        }, 1000);
         break;
       } else if (!nextTile && nextX >= 0 && nextX < size && nextY >= 0 && nextY < size) {
         tile.x = nextX;
@@ -171,7 +183,18 @@ const moveTiles = (dx, dy) => {
 // 在组件挂载后添加键盘事件监听
 onMounted(() => {
   window.addEventListener('keydown', handleKeyDown);
+  document.addEventListener('touchstart', handleTouchStart);
+  document.addEventListener('touchmove', handleTouchMove, { passive: false });
+  document.addEventListener('touchend', handleTouchEnd);
   initializeGame();
+
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown);
+  document.removeEventListener('touchstart', handleTouchStart);
+  document.removeEventListener('touchmove', handleTouchMove);
+  document.removeEventListener('touchend', handleTouchEnd);
 });
 
 
@@ -257,6 +280,47 @@ watch(tiles, (newTiles) => {
   console.log('Tiles updated:', newTiles);
 });
 
+//行動裝置
+
+const startX = ref(0);
+const startY = ref(0);
+
+const handleTouchStart = (event) => {
+  const touch = event.touches[0];
+  startX.value = touch.clientX;
+  startY.value = touch.clientY;
+};
+
+const handleTouchMove = (event) => {
+  // 阻止默认行为以防止页面滚动
+  event.preventDefault();
+};
+
+const handleTouchEnd = (event) => {
+  const touch = event.changedTouches[0];
+  const endX = touch.clientX;
+  const endY = touch.clientY;
+
+  const deltaX = endX - startX.value;
+  const deltaY = endY - startY.value;
+
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    // 水平方向滑动
+    if (deltaX > 0) {
+      handleKeyDown({ key: 'ArrowRight' });
+    } else {
+      handleKeyDown({ key: 'ArrowLeft' });
+    }
+  } else {
+    // 垂直方向滑动
+    if (deltaY > 0) {
+      handleKeyDown({ key: 'ArrowDown' });
+    } else {
+      handleKeyDown({ key: 'ArrowUp' });
+    }
+  }
+};
+
 
 </script>
 
@@ -267,6 +331,11 @@ watch(tiles, (newTiles) => {
 }
 .tile {
   position: absolute;
+}
+
+.getScore{
+  animation: scale-up 0.3s ease-in-out;
+
 }
 
 </style>
