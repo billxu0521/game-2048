@@ -5,7 +5,7 @@
         <div class="p-5">
           <h1 class="text-4xl font-bold mb-8 ">2048 Game</h1>
           <div class="flex justify-between">
-            <div class="flex flex-col justify-center score-board bg-gray-500 w-[10vw]  border rounded-lg">
+            <div class="flex flex-col justify-center score-board bg-gray-500 md:w-[20vw] w-[30vw]   border rounded-lg">
               <div class="score-label text-sm text-center text-white ">Score</div>
               <div class="score-label text-xl text-center text-white ">{{ totalscore }}
                 <span  class="fixed px-1 score-label text-xl text-center text-white getScore" v-if="isGetScore">
