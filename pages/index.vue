@@ -5,7 +5,7 @@
         <div class="p-5">
           <h1 class="text-4xl font-bold mb-8 ">2048 Game</h1>
           <div class="flex justify-between">
-            <div class="flex flex-col justify-center score-board bg-gray-500 md:w-[20vw] w-[30vw]   border rounded-lg">
+            <div class="flex flex-col justify-center score-board bg-gray-500 sm:w-[10vw] w-[30vw]   border rounded-lg">
               <div class="score-label text-sm text-center text-white ">Score</div>
               <div class="score-label text-xl text-center text-white ">{{ totalscore }}
                 <span  class="fixed px-1 score-label text-xl text-center text-white getScore" v-if="isGetScore">
@@ -120,6 +120,9 @@ const handleKeyDown = (event) => {
   if(!checkGameOver(1, 0) && !checkGameOver(-1, 0) && !checkGameOver(0, 1) && !checkGameOver(0, 1)){
     alert('Game Over');
   }
+  if(checkGameWin()){
+    alert('You Win!');
+  }
   round.value++;
   console.log('Round:', round.value);
 };
@@ -197,6 +200,9 @@ onUnmounted(() => {
   document.removeEventListener('touchend', handleTouchEnd);
 });
 
+const checkGameWin = () => {
+  return tiles.value.some(tile => tile.value === 2048);
+};
 
 const checkGameOver = (dx, dy) => {
   
@@ -289,6 +295,7 @@ const handleTouchStart = (event) => {
   const touch = event.touches[0];
   startX.value = touch.clientX;
   startY.value = touch.clientY;
+  console.log(touch);
 };
 
 const handleTouchMove = (event) => {
